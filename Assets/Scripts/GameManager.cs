@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
     private const int GridExtraRows = 4;
     private const int GridColumns = 10;
 
-    private static int[][,] IShape = {
+    private static int[][,] IPiece = {
         new int[,] {
             { 0, 0, 0, 0 },
             { 1, 1, 1, 1 },
@@ -36,7 +37,7 @@ public class GameManager : MonoBehaviour
             { 0, 1, 0, 0 }
         }
     };
-    private static int[][,] JShape = {
+    private static int[][,] JPiece = {
         new int[,] {
             { 1, 0, 0 },
             { 1, 1, 1 },
@@ -58,7 +59,7 @@ public class GameManager : MonoBehaviour
             { 1, 1, 0 }
         }
     };
-    private static int[][,] LShape = {
+    private static int[][,] LPiece = {
         new int[,] {
             { 0, 0, 1 },
             { 1, 1, 1 },
@@ -80,7 +81,7 @@ public class GameManager : MonoBehaviour
             { 0, 1, 0 }
         }
     };
-    private static int[][,] SShape = {
+    private static int[][,] SPiece = {
         new int[,] {
             { 0, 1, 1 },
             { 1, 1, 0 },
@@ -102,7 +103,7 @@ public class GameManager : MonoBehaviour
             { 0, 1, 0 }
         }
     };
-    private static int[][,] ZShape = {
+    private static int[][,] ZPiece = {
         new int[,] {
             { 1, 1, 0 },
             { 0, 1, 1 },
@@ -124,7 +125,7 @@ public class GameManager : MonoBehaviour
             { 1, 0, 0 }
         }
     };
-    private static int[][,] TShape = {
+    private static int[][,] TPiece = {
         new int[,] {
             { 0, 1, 0 },
             { 1, 1, 1 },
@@ -146,7 +147,7 @@ public class GameManager : MonoBehaviour
             { 0, 1, 0 }
         }
     };
-    private static int[][,] OShape = {
+    private static int[][,] OPiece = {
         new int[,] {
             { 1, 1 },
             { 1, 1 },
@@ -155,10 +156,10 @@ public class GameManager : MonoBehaviour
 
     private static int[,] grid = new int[GridRows + GridExtraRows, GridColumns];
 
-    private static int activeRow = 3;
-    private static int activeColumn = 4;
-    private static int activeRotation = 2;
-    private static int[][,] active = TShape;
+    private static int activeRow = 4;
+    private static int activeColumn = 0;
+    private static int activeRotation = 0;
+    private static int[][,] active = TPiece;
     private static int activeSize = active[activeRotation].GetLength(0);
 
     void Start() { }
@@ -179,6 +180,32 @@ public class GameManager : MonoBehaviour
         int shapeColumn = column - activeColumn;
 
         return active[activeRotation][shapeRow, shapeColumn] == 1 ? true : false;
+    }
+
+    private bool IsCellInGrid(int row, int column) {
+        return (row >= 0 && row < GridRows + GridExtraRows && column >= 0 && column < GridColumns) ? true : false;
+    }
+
+    private bool IsPositionInGrid(int row, int column, int rotation) {
+        int boundStartColumn = column;
+        int boundEndRow = row + activeSize - 1;
+        int boundEndColumn = column + activeSize - 1;
+
+        if (boundStartColumn >= 0 && boundEndRow < GridRows + GridExtraRows && boundEndColumn < GridColumns) { return true; }
+
+        for (int shapeRow = 0; shapeRow < activeSize; shapeRow++) {
+            for (int shapeColumn = 0; shapeColumn < activeSize; shapeColumn++) {
+                if (active[rotation][shapeRow, shapeColumn] == 1) {
+                    if (!IsCellInGrid(row + shapeRow, column + shapeColumn)) { return false; }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private bool IsPositionValid(int row, int column, int rotation) {
+        return IsPositionInGrid(row, column, rotation);
     }
 
     private void UpdateDisplay() {
