@@ -1,7 +1,5 @@
-using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class GameManager : MonoBehaviour
 {
@@ -165,7 +163,21 @@ public class GameManager : MonoBehaviour
     void Start() { }
 
     void Update() {
+        Movement();
         UpdateDisplay();
+    }
+
+    private int GetNextRotation() {
+        int lastRotation = active.Length - 1;
+
+        return activeRotation == lastRotation ? 0 : activeRotation + 1;
+    }
+
+    private void Movement() {
+        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
+        if (Input.GetKeyDown(KeyCode.DownArrow) && IsPositionValid(activeRow + 1, activeColumn, activeRotation)) { activeRow++; }
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
+        if (Input.GetKeyDown(KeyCode.RightArrow) && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
     }
 
     private bool IsCellActive(int row, int column) {
@@ -176,10 +188,14 @@ public class GameManager : MonoBehaviour
 
         if (row < boundStartRow || column < boundStartColumn || row > boundEndRow || column > boundEndColumn) { return false; }
 
-        int shapeRow = row - activeRow;
-        int shapeColumn = column - activeColumn;
+        int pieceRow = row - activeRow;
+        int pieceColumn = column - activeColumn;
 
-        return active[activeRotation][shapeRow, shapeColumn] == 1 ? true : false;
+        return active[activeRotation][pieceRow, pieceColumn] == 1 ? true : false;
+    }
+
+    private bool IsCellFree(int row, int column) {
+        return grid[row, column] == 1 ? false : true;
     }
 
     private bool IsCellInGrid(int row, int column) {
@@ -193,10 +209,22 @@ public class GameManager : MonoBehaviour
 
         if (boundStartColumn >= 0 && boundEndRow < GridRows + GridExtraRows && boundEndColumn < GridColumns) { return true; }
 
-        for (int shapeRow = 0; shapeRow < activeSize; shapeRow++) {
-            for (int shapeColumn = 0; shapeColumn < activeSize; shapeColumn++) {
-                if (active[rotation][shapeRow, shapeColumn] == 1) {
-                    if (!IsCellInGrid(row + shapeRow, column + shapeColumn)) { return false; }
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
+                if (active[rotation][pieceRow, pieceColumn] == 1) {
+                    if (!IsCellInGrid(row + pieceRow, column + pieceColumn)) { return false; }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private bool IsPositionFree(int row, int column, int rotation) {
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
+                if (active[rotation][pieceRow, pieceColumn] == 1) {
+                    if (!IsCellFree(row + pieceRow, column + pieceColumn)) { return false; }
                 }
             }
         }
@@ -205,7 +233,7 @@ public class GameManager : MonoBehaviour
     }
 
     private bool IsPositionValid(int row, int column, int rotation) {
-        return IsPositionInGrid(row, column, rotation);
+        return IsPositionInGrid(row, column, rotation) && IsPositionFree(row, column, rotation);
     }
 
     private void UpdateDisplay() {
