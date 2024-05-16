@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -175,8 +176,32 @@ public class GameManager : MonoBehaviour
         UpdateDisplay();
     }
 
+    private void ClearRows() {
+        for (int row = activeRow; row < Math.Min(activeRow + activeSize, GridRows + GridExtraRows); row++) {
+            bool clearRow = true;
+
+            for (int column = 0; column < GridColumns; column++) {
+                if (grid[row, column] == 0) {
+                    clearRow = false;
+                }
+            }
+
+            if (clearRow) {
+                for (int r = row - 1; r >= GridExtraRows; r--) {
+                    for (int c = 0; c < GridColumns; c++) {
+                        grid[r + 1, c] = grid[r, c];
+                    }
+                }
+
+                for (int c = 0; c < GridColumns; c++) {
+                    grid[GridExtraRows, c] = 0;
+                }
+            }
+        }
+    }
+
     private void CreateActive() {
-        active = Pieces[Random.Range(0, Pieces.Length)];
+        active = Pieces[UnityEngine.Random.Range(0, Pieces.Length)];
         activeRotation = 0;
         activeSize = active[activeRotation].GetLength(0);
         activeRow = 2;
@@ -192,6 +217,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        ClearRows();
         CreateActive();
     }
 
