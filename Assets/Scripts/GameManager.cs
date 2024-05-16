@@ -152,21 +152,47 @@ public class GameManager : MonoBehaviour
         }
     };
 
+    private static int[][][,] Pieces = {
+        IPiece, JPiece, LPiece, SPiece, ZPiece, TPiece, OPiece
+    };
+
     private static int[,] grid = new int[GridRows + GridExtraRows, GridColumns];
 
-    private static int activeRow = 4;
-    private static int activeColumn = 0;
-    private static int activeRotation = 0;
-    private static int[][,] active = TPiece;
-    private static int activeSize = active[activeRotation].GetLength(0);
+    private static int[][,] active;
+    private static int activeRotation;
+    private static int activeSize;
+    private static int activeRow;
+    private static int activeColumn;
 
     private static float dropTime = 1.0f;
 
-    void Start() { }
+    void Start() {
+        CreateActive();
+    }
 
     void Update() {
         Movement();
         UpdateDisplay();
+    }
+
+    private void CreateActive() {
+        active = Pieces[Random.Range(0, Pieces.Length)];
+        activeRotation = 0;
+        activeSize = active[activeRotation].GetLength(0);
+        activeRow = 4 - activeSize;
+        activeColumn = (GridColumns - activeSize) / 2;
+    }
+
+    private void PlaceActive() {
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
+                if (active[activeRotation][pieceRow, pieceColumn] == 1) {
+                    grid[activeRow + pieceRow, activeColumn + pieceColumn] = 1;
+                }
+            }
+        }
+
+        CreateActive();
     }
 
     private int GetNextRotation() {
@@ -178,16 +204,27 @@ public class GameManager : MonoBehaviour
     private void Movement() {
         dropTime -= Time.deltaTime;
 
-        if (dropTime <= 0.0f) {
+        if (dropTime <= 0.0f || Input.GetKeyDown(KeyCode.DownArrow)) {
             if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
                 activeRow++;
+            } else {
+                PlaceActive();
             }
 
             dropTime = 1.0f;
         }
 
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            while (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+                activeRow++;
+            }
+
+            dropTime = 1.0f;
+
+            PlaceActive();
+        }
+
         if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
-        if (Input.GetKeyDown(KeyCode.DownArrow) && IsPositionValid(activeRow + 1, activeColumn, activeRotation)) { activeRow++; }
         if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
         if (Input.GetKeyDown(KeyCode.RightArrow) && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
     }
@@ -195,7 +232,7 @@ public class GameManager : MonoBehaviour
     private bool IsCellActive(int row, int column) {
         int boundStartRow = activeRow;
         int boundStartColumn = activeColumn;
-        int boundEndRow = activeRow + activeSize - 1;
+        int boundEndRow = 2;
         int boundEndColumn = activeColumn + activeSize - 1;
 
         if (row < boundStartRow || column < boundStartColumn || row > boundEndRow || column > boundEndColumn) { return false; }
@@ -249,7 +286,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void UpdateDisplay() {
-        string displayText = "";
+        string displayText = "<mspace=7>";
 
         for (int row = GridExtraRows; row < GridRows + GridExtraRows; row++) {
             for (int column = 0; column < GridColumns; column++) {
