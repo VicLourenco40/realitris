@@ -179,7 +179,7 @@ public class GameManager : MonoBehaviour
         active = Pieces[Random.Range(0, Pieces.Length)];
         activeRotation = 0;
         activeSize = active[activeRotation].GetLength(0);
-        activeRow = 4 - activeSize;
+        activeRow = 2;
         activeColumn = (GridColumns - activeSize) / 2;
     }
 
@@ -232,7 +232,7 @@ public class GameManager : MonoBehaviour
     private bool IsCellActive(int row, int column) {
         int boundStartRow = activeRow;
         int boundStartColumn = activeColumn;
-        int boundEndRow = 2;
+        int boundEndRow = activeRow + activeSize - 1;
         int boundEndColumn = activeColumn + activeSize - 1;
 
         if (row < boundStartRow || column < boundStartColumn || row > boundEndRow || column > boundEndColumn) { return false; }
