@@ -160,6 +160,8 @@ public class GameManager : MonoBehaviour
     private static int[][,] active = TPiece;
     private static int activeSize = active[activeRotation].GetLength(0);
 
+    private static float dropTime = 1.0f;
+
     void Start() { }
 
     void Update() {
@@ -174,6 +176,16 @@ public class GameManager : MonoBehaviour
     }
 
     private void Movement() {
+        dropTime -= Time.deltaTime;
+
+        if (dropTime <= 0.0f) {
+            if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+                activeRow++;
+            }
+
+            dropTime = 1.0f;
+        }
+
         if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
         if (Input.GetKeyDown(KeyCode.DownArrow) && IsPositionValid(activeRow + 1, activeColumn, activeRotation)) { activeRow++; }
         if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
