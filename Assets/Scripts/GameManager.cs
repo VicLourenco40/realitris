@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -164,15 +165,34 @@ public class GameManager : MonoBehaviour
     private static int activeRow;
     private static int activeColumn;
 
-    private static float dropTime = 1.0f;
+    private static float dropTimer = 1.0f;
+
+    private static bool gameOver = false;
+    private static float gameOverTimer = 5.0f;
 
     void Start() {
         CreateActive();
     }
 
     void Update() {
-        Movement();
-        UpdateDisplay();
+        if (gameOver) {
+            gameOverTimer -= Time.deltaTime;
+
+            if (gameOverTimer <= 0.0f) {
+                RestartGame();
+            }
+        } else {
+            UpdateActive();
+            UpdateGridDisplay();
+        }
+    }
+
+    private void RestartGame() {
+        grid = new int[GridRows + GridExtraRows, GridColumns];
+        gameOver = false;
+        gameOverTimer = 5.0f;
+
+        CreateActive();
     }
 
     private void ClearRows() {
@@ -186,14 +206,24 @@ public class GameManager : MonoBehaviour
             }
 
             if (clearRow) {
-                for (int r = row - 1; r >= GridExtraRows; r--) {
+                for (int r = row - 1; r >= 0; r--) {
                     for (int c = 0; c < GridColumns; c++) {
                         grid[r + 1, c] = grid[r, c];
                     }
                 }
 
                 for (int c = 0; c < GridColumns; c++) {
-                    grid[GridExtraRows, c] = 0;
+                    grid[0, c] = 0;
+                }
+            }
+        }
+    }
+
+    private void CheckGridOverflow() {
+        for (int row = GridExtraRows - 1; row >= 0; row--) {
+            for (int column = 0; column < GridColumns; column++) {
+                if (grid[row, column] == 1) {
+                    gameOver = true;
                 }
             }
         }
@@ -217,6 +247,11 @@ public class GameManager : MonoBehaviour
         }
 
         ClearRows();
+
+        if (activeRow < GridExtraRows) {
+            CheckGridOverflow();
+        }
+
         CreateActive();
     }
 
@@ -226,17 +261,17 @@ public class GameManager : MonoBehaviour
         return activeRotation == lastRotation ? 0 : activeRotation + 1;
     }
 
-    private void Movement() {
-        dropTime -= Time.deltaTime;
+    private void UpdateActive() {
+        dropTimer -= Time.deltaTime;
 
-        if (dropTime <= 0.0f || Input.GetKeyDown(KeyCode.DownArrow)) {
+        if (dropTimer <= 0.0f || Input.GetKeyDown(KeyCode.DownArrow)) {
             if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
                 activeRow++;
             } else {
                 PlaceActive();
             }
 
-            dropTime = 1.0f;
+            dropTimer = 1.0f;
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -244,7 +279,7 @@ public class GameManager : MonoBehaviour
                 activeRow++;
             }
 
-            dropTime = 1.0f;
+            dropTimer = 1.0f;
 
             PlaceActive();
         }
@@ -310,7 +345,7 @@ public class GameManager : MonoBehaviour
         return IsPositionInGrid(row, column, rotation) && IsPositionFree(row, column, rotation);
     }
 
-    private void UpdateDisplay() {
+    private void UpdateGridDisplay() {
         string displayText = "<mspace=7>";
 
         for (int row = GridExtraRows; row < GridRows + GridExtraRows; row++) {
