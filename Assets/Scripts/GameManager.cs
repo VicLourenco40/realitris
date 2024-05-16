@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 
@@ -177,7 +176,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void ClearRows() {
-        for (int row = activeRow; row < Math.Min(activeRow + activeSize, GridRows + GridExtraRows); row++) {
+        for (int row = activeRow; row < Mathf.Min(activeRow + activeSize, GridRows + GridExtraRows); row++) {
             bool clearRow = true;
 
             for (int column = 0; column < GridColumns; column++) {
@@ -201,7 +200,7 @@ public class GameManager : MonoBehaviour
     }
 
     private void CreateActive() {
-        active = Pieces[UnityEngine.Random.Range(0, Pieces.Length)];
+        active = Pieces[Random.Range(0, Pieces.Length)];
         activeRotation = 0;
         activeSize = active[activeRotation].GetLength(0);
         activeRow = 2;
