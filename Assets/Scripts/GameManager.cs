@@ -182,14 +182,14 @@ public class GameManager : MonoBehaviour
     private static float dasDownDelayTimer = DasDelaySpeed;
     private static float dasDownTimer = DasSpeed;
 
-    private static int score = 0;
-    private static int rows = 0;
-    private static int level = 1;
-    private static bool gameOver = false;
-    private static float gameOverTimer = 5.0f;
+    private static int score;
+    private static int rows;
+    private static int level;
+    private static bool gameOver;
+    private static float gameOverTimer;
 
     void Start() {
-        CreateActive();
+        RestartGame();
     }
 
     void Update() {
@@ -208,10 +208,17 @@ public class GameManager : MonoBehaviour
 
     private void RestartGame() {
         grid = new int[GridRows + GridExtraRows, GridColumns];
+        score = 0;
+        rows = 0;
+        level = 1;
         gameOver = false;
         gameOverTimer = 5.0f;
 
         CreateActive();
+    }
+
+    private float GetDropSpeed() {
+        return Mathf.Max(0.1f, DropSpeed / level);
     }
 
     private void ClearRows() {
@@ -313,7 +320,7 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            dropTimer = DropSpeed;
+            dropTimer = GetDropSpeed();
 
             PlaceActive();
         }
@@ -325,7 +332,7 @@ public class GameManager : MonoBehaviour
                 PlaceActive();
             }
 
-            dropTimer = DropSpeed;
+            dropTimer = GetDropSpeed();
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
@@ -340,7 +347,7 @@ public class GameManager : MonoBehaviour
                 PlaceActive();
             }
 
-            dropTimer = DropSpeed;
+            dropTimer = GetDropSpeed();
         }
 
         if (Input.GetKey(KeyCode.DownArrow)) {
@@ -359,7 +366,7 @@ public class GameManager : MonoBehaviour
                     } else {
                         PlaceActive();
                     }
-                    dropTimer = DropSpeed;
+                    dropTimer = GetDropSpeed();
                     dasDownTimer = DasSpeed;
                 }
             }
