@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     private const int GridColumns = 10;
 
     private const float DropSpeed = 1.0f;
+    private const float PlaceSpeed = 0.5f;
     private const float DasDelaySpeed = 0.3f;
     private const float DasSpeed = 0.05f;
 
@@ -179,6 +180,8 @@ public class GameManager : MonoBehaviour
     private static int activeColumn;
 
     private static float dropTimer = DropSpeed;
+    private static bool place = false;
+    private static float placeTimer = PlaceSpeed;
     private static float dasDelayTimer = DasDelaySpeed;
     private static float dasTimer = DasSpeed;
     private static float dasDownDelayTimer = DasDelaySpeed;
@@ -201,6 +204,7 @@ public class GameManager : MonoBehaviour
                 RestartGame();
             }
         } else {
+            Debug.Log(placeTimer);
             UpdateActive();
             UpdateGridDisplay();
             UpdateNextPieceDisplay();
@@ -290,6 +294,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        place = false;
+        placeTimer = PlaceSpeed;
+
         ClearRows();
 
         if (activeRow < GridExtraRows) {
@@ -319,9 +326,21 @@ public class GameManager : MonoBehaviour
 
         dropTimer -= Time.deltaTime;
 
+        if (place) {
+            place = !IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+            placeTimer -= Time.deltaTime;
+
+            if (placeTimer <= 0.0f) {
+                PlaceActive();
+            }
+        } else {
+            placeTimer = PlaceSpeed;
+        }
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             while (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
                 activeRow++;
+
                 if (!dropScored) {
                     score += ScoreHardDrop;
                     dropScored = true;
@@ -334,27 +353,26 @@ public class GameManager : MonoBehaviour
         }
 
         if (dropTimer <= 0.0f) {
-            if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
-                activeRow++;
-            } else {
-                PlaceActive();
-            }
-
+            bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+            
+            if (valid) { activeRow++; }
+            place = !valid;
             dropTimer = GetDropSpeed();
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
-            if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+            bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+
+            if (valid) {
                 activeRow++;
+
                 if (!dropScored) {
                     score += ScoreSoftDrop;
                     dropScored = true;
                 }
             }
-            else {
-                PlaceActive();
-            }
 
+            place = !valid;
             dropTimer = GetDropSpeed();
         }
 
@@ -365,15 +383,18 @@ public class GameManager : MonoBehaviour
                 dasDownTimer -= Time.deltaTime;
 
                 if (dasDownTimer <= 0.0f) {
-                    if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+                    bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+
+                    if (valid) {
                         activeRow++;
+
                         if (!dropScored) {
                             score += ScoreSoftDrop;
                             dropScored = true;
                         }
-                    } else {
-                        PlaceActive();
                     }
+
+                    place = !valid;
                     dropTimer = GetDropSpeed();
                     dasDownTimer = DasSpeed;
                 }
