@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +8,10 @@ public class GameManager : MonoBehaviour
     private const int GridRows = 20;
     private const int GridExtraRows = 4;
     private const int GridColumns = 10;
+
+    private const float DropSpeed = 1.0f;
+    private const float DasDelaySpeed = 0.3f;
+    private const float DasSpeed = 0.05f;
 
     private static int[][,] IPiece = {
         new int[,] {
@@ -165,7 +168,11 @@ public class GameManager : MonoBehaviour
     private static int activeRow;
     private static int activeColumn;
 
-    private static float dropTimer = 1.0f;
+    private static float dropTimer = DropSpeed;
+    private static float dasDelayTimer = DasDelaySpeed;
+    private static float dasTimer = DasSpeed;
+    private static float dasDownDelayTimer = DasDelaySpeed;
+    private static float dasDownTimer = DasSpeed;
 
     private static bool gameOver = false;
     private static float gameOverTimer = 5.0f;
@@ -261,6 +268,15 @@ public class GameManager : MonoBehaviour
         return activeRotation == lastRotation ? 0 : activeRotation + 1;
     }
 
+    private int GetDirection() {
+        int direction = 0;
+
+        if (Input.GetKey(KeyCode.LeftArrow)) { direction--; }
+        if (Input.GetKey(KeyCode.RightArrow)) { direction++; }
+
+        return direction;
+    }
+
     private void UpdateActive() {
         dropTimer -= Time.deltaTime;
 
@@ -271,7 +287,28 @@ public class GameManager : MonoBehaviour
                 PlaceActive();
             }
 
-            dropTimer = 1.0f;
+            dropTimer = DropSpeed;
+        }
+
+        if (Input.GetKey(KeyCode.DownArrow)) {
+            dasDownDelayTimer -= Time.deltaTime;
+
+            if (dasDownDelayTimer <= 0.0f) {
+                dasDownTimer -= Time.deltaTime;
+
+                if (dasDownTimer <= 0.0f) {
+                    if (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+                        activeRow++;
+                    } else {
+                        PlaceActive();
+                    }
+                    dropTimer = DropSpeed;
+                    dasDownTimer = DasSpeed;
+                }
+            }
+        } else {
+            dasDownDelayTimer = DasDelaySpeed;
+            dasDownTimer = DasSpeed;
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -279,14 +316,31 @@ public class GameManager : MonoBehaviour
                 activeRow++;
             }
 
-            dropTimer = 1.0f;
+            dropTimer = DropSpeed;
 
             PlaceActive();
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
         if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
         if (Input.GetKeyDown(KeyCode.RightArrow) && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
+
+        if (GetDirection() == 0) {
+            dasDelayTimer = DasDelaySpeed;
+            dasTimer = DasSpeed;
+        } else {
+            dasDelayTimer -= Time.deltaTime;
+        }
+
+        if (dasDelayTimer <= 0.0f) {
+            if (dasTimer <= 0.0f) {
+                if (IsPositionValid(activeRow, activeColumn + GetDirection(), activeRotation)) { activeColumn += GetDirection(); }
+                dasTimer = DasSpeed;
+            } else {
+                dasTimer -= Time.deltaTime;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
     }
 
     private bool IsCellActive(int row, int column) {
