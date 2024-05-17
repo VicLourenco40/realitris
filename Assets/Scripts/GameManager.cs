@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI nextPieceDisplay;
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
+    public TextMeshProUGUI gameOverMessage;
 
     private const int GridRows = 20;
     private const int GridExtraRows = 4;
@@ -187,7 +188,6 @@ public class GameManager : MonoBehaviour
     private static int rows;
     private static int level;
     private static bool gameOver;
-    private static float gameOverTimer;
 
     private static int nextPiece;
 
@@ -197,9 +197,7 @@ public class GameManager : MonoBehaviour
 
     void Update() {
         if (gameOver) {
-            gameOverTimer -= Time.deltaTime;
-
-            if (gameOverTimer <= 0.0f) {
+            if (Input.GetKeyDown(KeyCode.R)) {
                 RestartGame();
             }
         } else {
@@ -216,7 +214,7 @@ public class GameManager : MonoBehaviour
         rows = 0;
         level = 1;
         gameOver = false;
-        gameOverTimer = 5.0f;
+        gameOverMessage.gameObject.SetActive(false);
         nextPiece = GetRandomPiece();
         CreateActive();
     }
@@ -264,6 +262,7 @@ public class GameManager : MonoBehaviour
             for (int column = 0; column < GridColumns; column++) {
                 if (grid[row, column] == 1) {
                     gameOver = true;
+                    gameOverMessage.gameObject.SetActive(true);
                 }
             }
         }
