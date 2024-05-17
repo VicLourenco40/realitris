@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public TextMeshProUGUI gridDisplay;
     public TextMeshProUGUI nextPieceDisplay;
+    public TextMeshProUGUI holdPieceDisplay;
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
     public TextMeshProUGUI gameOverMessage;
@@ -173,7 +174,7 @@ public class GameManager : MonoBehaviour
 
     private static int[,] grid = new int[GridRows + GridExtraRows, GridColumns];
 
-    private static int[][,] active;
+    private static int active;
     private static int activeRotation;
     private static int activeSize;
     private static int activeRow;
@@ -192,6 +193,8 @@ public class GameManager : MonoBehaviour
     private static bool gameOver;
 
     private static int nextPiece;
+    private static int holdPiece;
+    private static bool holdUsed;
 
     void Start() {
         RestartGame();
@@ -206,6 +209,7 @@ public class GameManager : MonoBehaviour
             UpdateActive();
             UpdateGridDisplay();
             UpdateNextPieceDisplay();
+            UpdateHoldPieceDisplay();
             UpdateCounters();
         }
     }
@@ -218,6 +222,8 @@ public class GameManager : MonoBehaviour
         gameOver = false;
         gameOverMessage.gameObject.SetActive(false);
         nextPiece = GetRandomPiece();
+        holdPiece = -1;
+        holdUsed = false;
         CreateActive();
     }
 
@@ -274,35 +280,37 @@ public class GameManager : MonoBehaviour
         return Random.Range(0, Pieces.Length);
     }
 
-    private void CreateActive() {
-        active = Pieces[nextPiece];
+    private void CreateActive(int piece = -1) {
+        if (piece == -1) {
+            active = nextPiece;
+            nextPiece = GetRandomPiece();
+        } else {
+            active = piece;
+        }
         activeRotation = 0;
-        activeSize = active[activeRotation].GetLength(0);
+        activeSize = Pieces[active][0].GetLength(0);
         activeRow = 2;
         activeColumn = (GridColumns - activeSize) / 2;
-        nextPiece = GetRandomPiece();
     }
 
     private void PlaceActive() {
         for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
             for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
-                if (active[activeRotation][pieceRow, pieceColumn] == 1) {
+                if (Pieces[active][activeRotation][pieceRow, pieceColumn] == 1) {
                     grid[activeRow + pieceRow, activeColumn + pieceColumn] = 1;
                 }
             }
         }
 
+        holdUsed = false;
+
         ClearRows();
-
-        if (activeRow < GridExtraRows) {
-            CheckGridOverflow();
-        }
-
+        if (activeRow < GridExtraRows) { CheckGridOverflow(); }
         CreateActive();
     }
 
     private int GetNextRotation() {
-        int lastRotation = active.Length - 1;
+        int lastRotation = Pieces[active].Length - 1;
 
         return activeRotation == lastRotation ? 0 : activeRotation + 1;
     }
@@ -331,6 +339,19 @@ public class GameManager : MonoBehaviour
                 placeTimer = PlaceSpeed;
                 PlaceActive();
             }
+        }
+
+        if (!holdUsed && Input.GetKeyDown(KeyCode.Z)) {
+            int lastActive = active;
+
+            if (holdPiece == -1) {
+                CreateActive();
+            } else {
+                CreateActive(holdPiece);
+            }
+
+            holdPiece = lastActive;
+            holdUsed = true;
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -425,7 +446,7 @@ public class GameManager : MonoBehaviour
         int pieceRow = row - activeRow;
         int pieceColumn = column - activeColumn;
 
-        return active[activeRotation][pieceRow, pieceColumn] == 1 ? true : false;
+        return Pieces[active][activeRotation][pieceRow, pieceColumn] == 1 ? true : false;
     }
 
     private bool IsCellFree(int row, int column) {
@@ -445,7 +466,7 @@ public class GameManager : MonoBehaviour
 
         for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
             for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
-                if (active[rotation][pieceRow, pieceColumn] == 1) {
+                if (Pieces[active][rotation][pieceRow, pieceColumn] == 1) {
                     if (!IsCellInGrid(row + pieceRow, column + pieceColumn)) { return false; }
                 }
             }
@@ -457,7 +478,7 @@ public class GameManager : MonoBehaviour
     private bool IsPositionFree(int row, int column, int rotation) {
         for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
             for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
-                if (active[rotation][pieceRow, pieceColumn] == 1) {
+                if (Pieces[active][rotation][pieceRow, pieceColumn] == 1) {
                     if (!IsCellFree(row + pieceRow, column + pieceColumn)) { return false; }
                 }
             }
@@ -505,6 +526,31 @@ public class GameManager : MonoBehaviour
         }
 
         nextPieceDisplay.text = displayText;
+    }
+
+    private void UpdateHoldPieceDisplay() {
+        string displayText = "<mspace=7>";
+
+        if (holdPiece == -1) {
+            displayText += ". . . . \n. . . . \n. . . . \n. . . . ";
+        } else {
+            int holdPieceSize = Pieces[holdPiece][0].GetLength(0);
+
+            for (int row = 0; row < holdPieceSize; row++) {
+                for (int column = 0; column < holdPieceSize; column++) {
+                    if (Pieces[holdPiece][0][row, column] == 1) {
+                        displayText += "O ";
+                    }
+                    else {
+                        displayText += ". ";
+                    }
+                }
+
+                displayText += "\n";
+            }
+        }
+        
+        holdPieceDisplay.text = displayText;
     }
 
     private void UpdateCounters() {
