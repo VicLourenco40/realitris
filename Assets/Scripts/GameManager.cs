@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverMessage;
 
     private const int GridRows = 20;
-    private const int GridExtraRows = 4;
+    private const int GridExtraRows = 5;
     private const int GridColumns = 10;
 
     private const float DropSpeed = 1.0f;
@@ -362,14 +362,11 @@ public class GameManager : MonoBehaviour
             while (canMoveDown) {
                 activeRow++;
                 canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
-
-                if (!dropScored) {
-                    score += ScoreHardDrop;
-                    dropScored = true;
-                }
+                if (!dropScored) { score += ScoreHardDrop; }
             }
 
             dropTimer = GetDropSpeed();
+            dropScored = true;
 
             PlaceActive();
         }
