@@ -15,10 +15,9 @@ public class GameManager : MonoBehaviour
     private const float DasDelaySpeed = 0.3f;
     private const float DasSpeed = 0.05f;
 
-    private const int ScoreSingle = 100;
-    private const int ScoreDouble = 300;
-    private const int ScoreTriple = 500;
-    private const int ScoreTetris = 800;
+    private const int RowsPerLevel = 10;
+
+    private readonly int[] ScoreRows = { 100, 300, 500, 800 };
     private const int ScoreSoftDrop = 1;
     private const int ScoreHardDrop = 2;
 
@@ -242,8 +241,11 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        rows += rowsCleared;
-
+        if (rowsCleared > 0) {
+            rows += rowsCleared;
+            score += ScoreRows[rowsCleared - 1] * level;
+            level = 1 + (rows / RowsPerLevel);
+        }
     }
 
     private void CheckGridOverflow() {
