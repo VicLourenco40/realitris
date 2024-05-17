@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
     private const int GridColumns = 10;
 
     private const float DropSpeed = 1.0f;
-    private const float PlaceSpeed = 0.5f;
+    private const float PlaceSpeed = 1.0f;
     private const float DasDelaySpeed = 0.3f;
     private const float DasSpeed = 0.05f;
 
@@ -180,7 +180,6 @@ public class GameManager : MonoBehaviour
     private static int activeColumn;
 
     private static float dropTimer = DropSpeed;
-    private static bool place = false;
     private static float placeTimer = PlaceSpeed;
     private static float dasDelayTimer = DasDelaySpeed;
     private static float dasTimer = DasSpeed;
@@ -204,7 +203,6 @@ public class GameManager : MonoBehaviour
                 RestartGame();
             }
         } else {
-            Debug.Log(placeTimer);
             UpdateActive();
             UpdateGridDisplay();
             UpdateNextPieceDisplay();
@@ -224,7 +222,7 @@ public class GameManager : MonoBehaviour
     }
 
     private float GetDropSpeed() {
-        return Mathf.Max(0.1f, DropSpeed / level);
+        return Mathf.Max(0.1f, DropSpeed - (level * 0.1f));
     }
 
     private void ClearRows() {
@@ -294,9 +292,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        place = false;
-        placeTimer = PlaceSpeed;
-
         ClearRows();
 
         if (activeRow < GridExtraRows) {
@@ -322,24 +317,26 @@ public class GameManager : MonoBehaviour
     }
 
     private void UpdateActive() {
+        bool canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
         bool dropScored = false;
 
         dropTimer -= Time.deltaTime;
 
-        if (place) {
-            place = !IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+        if (canMoveDown) {
+            placeTimer = PlaceSpeed;
+        } else {
             placeTimer -= Time.deltaTime;
 
             if (placeTimer <= 0.0f) {
+                placeTimer = PlaceSpeed;
                 PlaceActive();
             }
-        } else {
-            placeTimer = PlaceSpeed;
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
-            while (IsPositionValid(activeRow + 1, activeColumn, activeRotation)) {
+            while (canMoveDown) {
                 activeRow++;
+                canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
 
                 if (!dropScored) {
                     score += ScoreHardDrop;
@@ -353,17 +350,12 @@ public class GameManager : MonoBehaviour
         }
 
         if (dropTimer <= 0.0f) {
-            bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
-            
-            if (valid) { activeRow++; }
-            place = !valid;
+            if (canMoveDown) { activeRow++; }
             dropTimer = GetDropSpeed();
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
-            bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
-
-            if (valid) {
+            if (canMoveDown) {
                 activeRow++;
 
                 if (!dropScored) {
@@ -372,7 +364,6 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            place = !valid;
             dropTimer = GetDropSpeed();
         }
 
@@ -383,9 +374,7 @@ public class GameManager : MonoBehaviour
                 dasDownTimer -= Time.deltaTime;
 
                 if (dasDownTimer <= 0.0f) {
-                    bool valid = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
-
-                    if (valid) {
+                    if (canMoveDown) {
                         activeRow++;
 
                         if (!dropScored) {
@@ -394,7 +383,6 @@ public class GameManager : MonoBehaviour
                         }
                     }
 
-                    place = !valid;
                     dropTimer = GetDropSpeed();
                     dasDownTimer = DasSpeed;
                 }
