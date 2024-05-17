@@ -265,15 +265,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CheckGridOverflow() {
-        for (int row = GridExtraRows - 1; row >= 0; row--) {
-            for (int column = 0; column < GridColumns; column++) {
-                if (grid[row, column] == 1) {
-                    gameOver = true;
-                    gameOverMessage.gameObject.SetActive(true);
-                }
-            }
+    private void CheckLockOut() {
+        for (int column = 0; column < GridColumns; column++) {
+            if (IsCellActive(GridExtraRows, column)) { return; }
         }
+        gameOver = true;
+        gameOverMessage.gameObject.SetActive(true);
     }
 
     private int GetRandomPiece() {
@@ -287,10 +284,17 @@ public class GameManager : MonoBehaviour
         } else {
             active = piece;
         }
+
+        activeRow = GridExtraRows;
+        if (active == 0) { activeRow--; }
+
         activeRotation = 0;
         activeSize = Pieces[active][0].GetLength(0);
-        activeRow = 2;
         activeColumn = (GridColumns - activeSize) / 2;
+
+        while(activeRow >= 0 && !IsPositionValid(activeRow, activeColumn, activeRotation)) {
+            activeRow--;
+        }
     }
 
     private void PlaceActive() {
@@ -305,8 +309,8 @@ public class GameManager : MonoBehaviour
         holdUsed = false;
 
         ClearRows();
-        if (activeRow < GridExtraRows) { CheckGridOverflow(); }
-        CreateActive();
+        if (activeRow < GridExtraRows) { CheckLockOut(); }
+        if (!gameOver) { CreateActive(); }
     }
 
     private int GetNextRotation() {
