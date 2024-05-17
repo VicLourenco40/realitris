@@ -4,6 +4,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public TextMeshProUGUI gridDisplay;
+    public TextMeshProUGUI nextPieceDisplay;
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
 
@@ -188,6 +189,8 @@ public class GameManager : MonoBehaviour
     private static bool gameOver;
     private static float gameOverTimer;
 
+    private static int nextPiece;
+
     void Start() {
         RestartGame();
     }
@@ -202,6 +205,7 @@ public class GameManager : MonoBehaviour
         } else {
             UpdateActive();
             UpdateGridDisplay();
+            UpdateNextPieceDisplay();
             UpdateCounters();
         }
     }
@@ -213,7 +217,7 @@ public class GameManager : MonoBehaviour
         level = 1;
         gameOver = false;
         gameOverTimer = 5.0f;
-
+        nextPiece = GetRandomPiece();
         CreateActive();
     }
 
@@ -265,12 +269,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private int GetRandomPiece() {
+        return Random.Range(0, Pieces.Length);
+    }
+
     private void CreateActive() {
-        active = Pieces[Random.Range(0, Pieces.Length)];
+        active = Pieces[nextPiece];
         activeRotation = 0;
         activeSize = active[activeRotation].GetLength(0);
         activeRow = 2;
         activeColumn = (GridColumns - activeSize) / 2;
+        nextPiece = GetRandomPiece();
     }
 
     private void PlaceActive() {
@@ -469,6 +478,25 @@ public class GameManager : MonoBehaviour
         }
 
         gridDisplay.text = displayText;
+    }
+
+    private void UpdateNextPieceDisplay() {
+        string displayText = "<mspace=7>";
+        int nextPieceSize = Pieces[nextPiece][0].GetLength(0);
+
+        for (int row = 0; row < nextPieceSize; row++) {
+            for (int column = 0; column < nextPieceSize; column++) {
+                if (Pieces[nextPiece][0][row, column] == 1) {
+                    displayText += "O ";
+                } else {
+                    displayText += ". ";
+                }
+            }
+
+            displayText += "\n";
+        }
+
+        nextPieceDisplay.text = displayText;
     }
 
     private void UpdateCounters() {
