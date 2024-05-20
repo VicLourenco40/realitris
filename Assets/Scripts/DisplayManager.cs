@@ -4,6 +4,37 @@ public class DisplayManager : MonoBehaviour
 {
     public GameObject prefabBlock;
 
+    private static int[,] IPiece = {
+        { 1, 1, 1, 1 }
+    };
+    private static int[,] JPiece = {
+        { 1, 0, 0 },
+        { 1, 1, 1 }
+    };
+    private static int[,] LPiece = {
+        { 0, 0, 1 },
+        { 1, 1, 1 }
+    };
+    private static int[,] OPiece = {
+        { 1, 1 },
+        { 1, 1 }
+    };
+    private static int[,] SPiece = {
+        { 0, 1, 1 },
+        { 1, 1, 0 }
+    };
+    private static int[,] TPiece = {
+        { 0, 1, 0 },
+        { 1, 1, 1 }
+    };
+    private static int[,] ZPiece = {
+        { 1, 1, 0 },
+        { 0, 1, 1 }
+    };
+    public int[][,] Pieces = {
+        IPiece, JPiece, LPiece, OPiece, SPiece, TPiece, ZPiece
+    };
+
     private static Color colorIPiece = new(0f, 1f, 1f, 1f);
     private static Color colorJPiece = new(0f, 0f, 1f, 1f);
     private static Color colorLPiece = new(1f, 0.5f, 0f, 1f);
@@ -18,37 +49,62 @@ public class DisplayManager : MonoBehaviour
 
     private static GameManager game;
     private static GameObject[,] gameGrid;
-    private static GameObject[,] nextGrid;
-    private static GameObject[,] holdGrid;
 
     void Start() {
         game = GameObject.Find("Game Manager").GetComponent<GameManager>();
         gameGrid = new GameObject[game.GridRows, game.GridColumns];
-        //nextGrid = new GameObject[game.PieceSize, game.PieceSize];
-        //holdGrid = new GameObject[game.PieceSize, game.PieceSize];
 
-        InitializeGrids(game.GridRows, game.GridColumns, "Grid", gameGrid);
-        //InitializeGrids(game.PieceSize, game.PieceSize, "Next", nextGrid);
-        //InitializeGrids(game.PieceSize, game.PieceSize, "Hold", holdGrid);
+        InitializeGameGrid();
     }
 
     void Update() {
         int nextPiece = game.pieceSequence[game.pieceIndex + 1];
-
+        
         UpdateGameGrid();
-        //UpdateGrids(nextGrid, nextPiece);
-        //UpdateGrids(holdGrid, game.holdPiece);
+        UpdateGrids("Next", nextPiece);
+        UpdateGrids("Hold", game.holdPiece);
     }
 
-    private void InitializeGrids(int rows, int columns, string parentName, GameObject[,] objects) {
-        for (int row = 0; row < rows; row++) {
-            for (int column = 0; column < columns; column++) {
+    private void UpdateGrids(string parentName, int piece) {
+        GameObject parent = GameObject.Find(parentName);
+        
+        foreach (Transform child in parent.transform) {
+            Destroy(child.gameObject);
+        }
+
+        if (piece == -1) { return; }
+        
+        int pieceX = Pieces[piece].GetLength(1);
+        int pieceY = Pieces[piece].GetLength(0);
+
+        for (int row = 0; row < pieceY; row++) {
+            for (int column = 0; column < pieceX; column++) {
+                if (Pieces[piece][row, column] == 0) { continue; }
+
                 GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
-                block.transform.parent = GameObject.Find(parentName).transform;
-                Vector3 position = new Vector3(column, (rows - row - 1), 0);
+                GameObject mesh = block.transform.GetChild(0).gameObject;
+                Renderer renderer = mesh.GetComponent<Renderer>();
+
+                float originX = ((4 - pieceX) / 2f) + column;
+                float originY = 3 - ((4 - pieceY) / 2f) - row;
+                Vector3 position = new(originX, originY, 0);
+                block.transform.parent = parent.transform;
+                block.transform.localPosition = position;
+
+                renderer.material.color = colors[piece];
+            }
+        }
+    }
+
+    private void InitializeGameGrid() {
+        for (int row = 0; row < game.GridRows; row++) {
+            for (int column = 0; column < game.GridColumns; column++) {
+                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
+                block.transform.parent = GameObject.Find("Grid").transform;
+                Vector3 position = new(column, game.GridRows - row - 1, 0);
                 block.transform.localPosition = position;
                 block.SetActive(false);
-                objects[row, column] = block;
+                gameGrid[row, column] = block;
             }
         }
     }
@@ -78,26 +134,6 @@ public class DisplayManager : MonoBehaviour
                 if (game.IsCellActive(row + game.GridExtraRows, column)) {
                     block.SetActive(true);
                     renderer.material.color = colors[game.active];
-                }
-            }
-        }
-    }
-
-    private void UpdateGrids(GameObject[,] grid, int piece) {
-        for (int row = 0; row < grid.GetLength(0); row++) {
-            for (int column = 0; column < grid.GetLength(0); column++) {
-                GameObject block = grid[row, column];
-
-                block.SetActive(false);
-
-                if (piece == -1) { return; }
-
-                if (game.Pieces[piece][0][row, column] == 1) {
-                    GameObject mesh = block.transform.GetChild(0).gameObject;
-                    Renderer renderer = mesh.GetComponent<Renderer>();
-
-                    block.SetActive(true);
-                    renderer.material.color = colors[piece];
                 }
             }
         }
