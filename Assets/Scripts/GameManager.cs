@@ -203,7 +203,7 @@ public class GameManager : MonoBehaviour
 
     public int pieceIndex;
     public int[] pieceSequence;
-    private static int holdPiece;
+    public int holdPiece;
     private static bool holdUsed;
 
     private static int score;
@@ -231,7 +231,6 @@ public class GameManager : MonoBehaviour
             }
         } else {
             UpdateActive();
-            UpdateHoldPieceDisplay();
             UpdateCounters();
         }
     }
@@ -557,31 +556,6 @@ public class GameManager : MonoBehaviour
 
     private bool IsPositionValid(int row, int column, int rotation) {
         return IsPositionInGrid(row, column, rotation) && IsPositionFree(row, column, rotation);
-    }
-
-    private void UpdateHoldPieceDisplay() {
-        string displayText = "<mspace=7>";
-
-        if (holdPiece == -1) {
-            displayText += ". . . . \n. . . . \n. . . . \n. . . . ";
-        } else {
-            int holdPieceSize = Pieces[holdPiece][0].GetLength(0);
-
-            for (int row = 0; row < holdPieceSize; row++) {
-                for (int column = 0; column < holdPieceSize; column++) {
-                    if (Pieces[holdPiece][0][row, column] == 1) {
-                        displayText += "O ";
-                    }
-                    else {
-                        displayText += ". ";
-                    }
-                }
-
-                displayText += "\n";
-            }
-        }
-        
-        holdPieceDisplay.text = displayText;
     }
 
     private void UpdateCounters() {
