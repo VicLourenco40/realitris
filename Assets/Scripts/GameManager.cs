@@ -1,28 +1,18 @@
-using JetBrains.Annotations;
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public TextMeshProUGUI gridDisplay;
     public TextMeshProUGUI nextPieceDisplay;
     public TextMeshProUGUI holdPieceDisplay;
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
     public TextMeshProUGUI gameOverMessage;
 
-    public GameObject blockPrefab;
-    private static GameObject[,] blockGrid = new GameObject[GridRows + GridExtraRows, GridColumns];
-
-    Color placedColor = new(0.75f, 0.75f, 0.75f, 1f);
-    Color activeColor = new(1f, 0f, 0f, 1f);
-    Color ghostColor = new(1f, 0f, 0f, 0.5f);
-
-    private const int GridRows = 20;
-    private const int GridExtraRows = 5;
-    private const int GridColumns = 10;
+    public int GridRows = 20;
+    public int GridExtraRows = 5;
+    public int GridColumns = 10;
 
     private const float DropSpeed = 1.0f;
     private const float PlaceSpeed = 1.0f;
@@ -105,6 +95,12 @@ public class GameManager : MonoBehaviour
             { 0, 1, 0 }
         }
     };
+    private static int[][,] OPiece = {
+        new int[,] {
+            { 1, 1 },
+            { 1, 1 },
+        }
+    };
     private static int[][,] SPiece = {
         new int[,] {
             { 0, 1, 1 },
@@ -123,6 +119,28 @@ public class GameManager : MonoBehaviour
         },
         new int[,] {
             { 1, 0, 0 },
+            { 1, 1, 0 },
+            { 0, 1, 0 }
+        }
+    };
+    private static int[][,] TPiece = {
+        new int[,] {
+            { 0, 1, 0 },
+            { 1, 1, 1 },
+            { 0, 0, 0 }
+        },
+        new int[,] {
+            { 0, 1, 0 },
+            { 0, 1, 1 },
+            { 0, 1, 0 }
+        },
+        new int[,] {
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 1, 0 }
+        },
+        new int[,] {
+            { 0, 1, 0 },
             { 1, 1, 0 },
             { 0, 1, 0 }
         }
@@ -149,46 +167,18 @@ public class GameManager : MonoBehaviour
             { 1, 0, 0 }
         }
     };
-    private static int[][,] TPiece = {
-        new int[,] {
-            { 0, 1, 0 },
-            { 1, 1, 1 },
-            { 0, 0, 0 }
-        },
-        new int[,] {
-            { 0, 1, 0 },
-            { 0, 1, 1 },
-            { 0, 1, 0 }
-        },
-        new int[,] {
-            { 0, 0, 0 },
-            { 1, 1, 1 },
-            { 0, 1, 0 }
-        },
-        new int[,] {
-            { 0, 1, 0 },
-            { 1, 1, 0 },
-            { 0, 1, 0 }
-        }
-    };
-    private static int[][,] OPiece = {
-        new int[,] {
-            { 1, 1 },
-            { 1, 1 },
-        }
-    };
-
+    
     private static int[][][,] Pieces = {
-        IPiece, JPiece, LPiece, SPiece, ZPiece, TPiece, OPiece
+        IPiece, JPiece, LPiece, OPiece, SPiece, TPiece, ZPiece
     };
 
-    private static int[,] grid = new int[GridRows + GridExtraRows, GridColumns];
+    public int[,] grid;
 
-    private static int active;
-    private static int activeRotation;
-    private static int activeSize;
-    private static int activeRow;
-    private static int activeColumn;
+    public int active;
+    private int activeRotation;
+    private int activeSize;
+    private int activeRow;
+    private int activeColumn;
 
     private static float dropTimer = DropSpeed;
     private static float placeTimer = PlaceSpeed;
@@ -208,9 +198,8 @@ public class GameManager : MonoBehaviour
     private static bool holdUsed;
 
     void Start() {
+        grid = new int[GridRows + GridExtraRows, GridColumns];
         RestartGame();
-
-        NewInitiateGridDisplay();
     }
 
     void Update() {
@@ -220,17 +209,13 @@ public class GameManager : MonoBehaviour
             }
         } else {
             UpdateActive();
-            UpdateGridDisplay();
             UpdateNextPieceDisplay();
             UpdateHoldPieceDisplay();
             UpdateCounters();
-
-            NewUpdateGridDisplay();
         }
     }
 
     private void RestartGame() {
-        grid = new int[GridRows + GridExtraRows, GridColumns];
         score = 0;
         rows = 0;
         level = 1;
@@ -241,11 +226,20 @@ public class GameManager : MonoBehaviour
         pieceIndex = -1;
         GeneratePieceSequence();
         GeneratePieceSequence();
+        ClearGrid();
         CreateActive();
     }
 
     private float GetDropSpeed() {
         return Mathf.Max(0.1f, DropSpeed - (level * 0.1f));
+    }
+
+    private void ClearGrid() {
+        for (int row = 0; row < GridRows + GridExtraRows; row++) {
+            for (int column = 0; column < GridColumns; column++) {
+                grid[row, column] = -1;
+            }
+        }
     }
 
     private void ClearRows() {
@@ -255,7 +249,7 @@ public class GameManager : MonoBehaviour
             bool clearRow = true;
 
             for (int column = 0; column < GridColumns; column++) {
-                if (grid[row, column] == 0) {
+                if (grid[row, column] == -1) {
                     clearRow = false;
                 }
             }
@@ -268,7 +262,7 @@ public class GameManager : MonoBehaviour
                 }
 
                 for (int c = 0; c < GridColumns; c++) {
-                    grid[0, c] = 0;
+                    grid[0, c] = -1;
                 }
 
                 rowsCleared++;
@@ -343,7 +337,7 @@ public class GameManager : MonoBehaviour
         for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
             for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
                 if (Pieces[active][activeRotation][pieceRow, pieceColumn] == 1) {
-                    grid[activeRow + pieceRow, activeColumn + pieceColumn] = 1;
+                    grid[activeRow + pieceRow, activeColumn + pieceColumn] = active;
                 }
             }
         }
@@ -488,7 +482,7 @@ public class GameManager : MonoBehaviour
         return ghostRow;
     }
 
-    private bool IsCellActive(int row, int column, bool ghost = false) {
+    public bool IsCellActive(int row, int column, bool ghost = false) {
         int checkRow = ghost ? GetGhostRow() : activeRow;
         int boundStartRow = checkRow;
         int boundStartColumn = activeColumn;
@@ -504,7 +498,7 @@ public class GameManager : MonoBehaviour
     }
 
     private bool IsCellFree(int row, int column) {
-        return grid[row, column] == 1 ? false : true;
+        return grid[row, column] == -1 ? true : false;
     }
 
     private bool IsCellInGrid(int row, int column) {
@@ -543,61 +537,6 @@ public class GameManager : MonoBehaviour
 
     private bool IsPositionValid(int row, int column, int rotation) {
         return IsPositionInGrid(row, column, rotation) && IsPositionFree(row, column, rotation);
-    }
-
-    private void UpdateGridDisplay() {
-        string displayText = "<mspace=7>";
-
-        for (int row = GridExtraRows; row < GridRows + GridExtraRows; row++) {
-            for (int column = 0; column < GridColumns; column++) {
-                if (IsCellActive(row, column)) {
-                    displayText += "O ";
-                } else if (IsCellActive(row, column, true)) {
-                    displayText += "o ";
-                } else {
-                    displayText += grid[row, column] == 1 ? "# " : ". ";
-                }
-            }
-
-            displayText += "\n";
-        }
-
-        gridDisplay.text = displayText;
-    }
-
-    private void NewInitiateGridDisplay() {
-        GameObject blocksEmpty = GameObject.Find("Blocks");
-
-        for (int row = 0; row < GridRows; row++) {
-            for (int column = 0; column < GridColumns; column++) {
-                Vector3 position = new Vector3(column, (19 - row), 0);
-                GameObject block = Instantiate(blockPrefab, position, Quaternion.identity);
-                block.transform.parent = blocksEmpty.transform;
-                block.SetActive(false);
-                blockGrid[row, column] = block;
-            }
-        }
-    }
-
-    private void NewUpdateGridDisplay() {
-        for (int row = 0; row < GridRows; row++) {
-            for (int column = 0; column < GridColumns; column++) {
-                GameObject block = blockGrid[row, column];
-                GameObject mesh = block.transform.GetChild(0).gameObject;
-                Renderer renderer = mesh.GetComponent<Renderer>();
-
-                if (IsCellActive(row + GridExtraRows, column)) {
-                    block.SetActive(true);
-                    renderer.material.color = activeColor;
-                } else if (IsCellActive(row + GridExtraRows, column, true)) {
-                    block.SetActive(true);
-                    renderer.material.color = ghostColor;
-                } else {
-                    block.SetActive(grid[row + GridExtraRows, column] == 1);
-                    renderer.material.color = placedColor;
-                }
-            }
-        }
     }
 
     private void UpdateNextPieceDisplay() {
