@@ -374,7 +374,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (!holdUsed && Input.GetKeyDown(KeyCode.Z)) {
+        if (!holdUsed && Input.GetKeyDown(KeyCode.C)) {
             int lastActive = active;
 
             if (holdPiece == -1) {
