@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -192,7 +193,8 @@ public class GameManager : MonoBehaviour
     private static int level;
     private static bool gameOver;
 
-    private static int nextPiece;
+    private static int pieceIndex;
+    private static int[] pieceSequence = new int[Pieces.Length * 2];
     private static int holdPiece;
     private static bool holdUsed;
 
@@ -221,9 +223,11 @@ public class GameManager : MonoBehaviour
         level = 1;
         gameOver = false;
         gameOverMessage.gameObject.SetActive(false);
-        nextPiece = GetRandomPiece();
         holdPiece = -1;
         holdUsed = false;
+        pieceIndex = -1;
+        GeneratePieceSequence();
+        GeneratePieceSequence();
         CreateActive();
     }
 
@@ -273,14 +277,39 @@ public class GameManager : MonoBehaviour
         gameOverMessage.gameObject.SetActive(true);
     }
 
-    private int GetRandomPiece() {
-        return Random.Range(0, Pieces.Length);
+    private void GeneratePieceSequence() {
+        int[] newSequence = new int[Pieces.Length];
+
+        for (int i = 0; i < newSequence.Length; i++) {
+            int num;
+
+            newSequence[i] = -1;
+
+            do {
+                num = UnityEngine.Random.Range(0, Pieces.Length);
+            } while (Array.IndexOf(newSequence, num) > -1);
+
+            newSequence[i] = num;
+
+            pieceSequence[i] = pieceSequence[i + Pieces.Length];
+            pieceSequence[i + Pieces.Length] = newSequence[i];
+        }
+    }
+
+    private int GetNextPiece() {
+        if (pieceIndex < Pieces.Length - 1) {
+            pieceIndex++;
+        } else {
+            pieceIndex = 0;
+            GeneratePieceSequence();
+        }
+
+        return pieceSequence[pieceIndex];
     }
 
     private void CreateActive(int piece = -1) {
         if (piece == -1) {
-            active = nextPiece;
-            nextPiece = GetRandomPiece();
+            active = GetNextPiece();
         } else {
             active = piece;
         }
@@ -525,11 +554,12 @@ public class GameManager : MonoBehaviour
 
     private void UpdateNextPieceDisplay() {
         string displayText = "<mspace=7>";
-        int nextPieceSize = Pieces[nextPiece][0].GetLength(0);
+        int nextPieceIndex = pieceSequence[pieceIndex + 1];
+        int nextPieceSize = Pieces[nextPieceIndex][0].GetLength(0);
 
         for (int row = 0; row < nextPieceSize; row++) {
             for (int column = 0; column < nextPieceSize; column++) {
-                if (Pieces[nextPiece][0][row, column] == 1) {
+                if (Pieces[nextPieceIndex][0][row, column] == 1) {
                     displayText += "O ";
                 } else {
                     displayText += ". ";
