@@ -1,5 +1,7 @@
+using JetBrains.Annotations;
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,6 +12,13 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
     public TextMeshProUGUI gameOverMessage;
+
+    public GameObject blockPrefab;
+    private static GameObject[,] blockGrid = new GameObject[GridRows + GridExtraRows, GridColumns];
+
+    Color placedColor = new(0.75f, 0.75f, 0.75f, 1f);
+    Color activeColor = new(1f, 0f, 0f, 1f);
+    Color ghostColor = new(1f, 0f, 0f, 0.5f);
 
     private const int GridRows = 20;
     private const int GridExtraRows = 5;
@@ -200,6 +209,8 @@ public class GameManager : MonoBehaviour
 
     void Start() {
         RestartGame();
+
+        NewInitiateGridDisplay();
     }
 
     void Update() {
@@ -213,6 +224,8 @@ public class GameManager : MonoBehaviour
             UpdateNextPieceDisplay();
             UpdateHoldPieceDisplay();
             UpdateCounters();
+
+            NewUpdateGridDisplay();
         }
     }
 
@@ -550,6 +563,41 @@ public class GameManager : MonoBehaviour
         }
 
         gridDisplay.text = displayText;
+    }
+
+    private void NewInitiateGridDisplay() {
+        GameObject blocksEmpty = GameObject.Find("Blocks");
+
+        for (int row = 0; row < GridRows; row++) {
+            for (int column = 0; column < GridColumns; column++) {
+                Vector3 position = new Vector3(column, (19 - row), 0);
+                GameObject block = Instantiate(blockPrefab, position, Quaternion.identity);
+                block.transform.parent = blocksEmpty.transform;
+                block.SetActive(false);
+                blockGrid[row, column] = block;
+            }
+        }
+    }
+
+    private void NewUpdateGridDisplay() {
+        for (int row = 0; row < GridRows; row++) {
+            for (int column = 0; column < GridColumns; column++) {
+                GameObject block = blockGrid[row, column];
+                GameObject mesh = block.transform.GetChild(0).gameObject;
+                Renderer renderer = mesh.GetComponent<Renderer>();
+
+                if (IsCellActive(row + GridExtraRows, column)) {
+                    block.SetActive(true);
+                    renderer.material.color = activeColor;
+                } else if (IsCellActive(row + GridExtraRows, column, true)) {
+                    block.SetActive(true);
+                    renderer.material.color = ghostColor;
+                } else {
+                    block.SetActive(grid[row + GridExtraRows, column] == 1);
+                    renderer.material.color = placedColor;
+                }
+            }
+        }
     }
 
     private void UpdateNextPieceDisplay() {
