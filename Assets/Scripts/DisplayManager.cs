@@ -24,20 +24,20 @@ public class DisplayManager : MonoBehaviour
     void Start() {
         game = GameObject.Find("Game Manager").GetComponent<GameManager>();
         gameGrid = new GameObject[game.GridRows, game.GridColumns];
-        nextGrid = new GameObject[game.PieceSize, game.PieceSize];
-        holdGrid = new GameObject[game.PieceSize, game.PieceSize];
+        //nextGrid = new GameObject[game.PieceSize, game.PieceSize];
+        //holdGrid = new GameObject[game.PieceSize, game.PieceSize];
 
         InitializeGrids(game.GridRows, game.GridColumns, "Grid", gameGrid);
-        InitializeGrids(game.PieceSize, game.PieceSize, "Next", nextGrid);
-        InitializeGrids(game.PieceSize, game.PieceSize, "Hold", holdGrid);
+        //InitializeGrids(game.PieceSize, game.PieceSize, "Next", nextGrid);
+        //InitializeGrids(game.PieceSize, game.PieceSize, "Hold", holdGrid);
     }
 
     void Update() {
         int nextPiece = game.pieceSequence[game.pieceIndex + 1];
 
         UpdateGameGrid();
-        UpdateGrids(nextGrid, nextPiece);
-        UpdateGrids(holdGrid, game.holdPiece);
+        //UpdateGrids(nextGrid, nextPiece);
+        //UpdateGrids(holdGrid, game.holdPiece);
     }
 
     private void InitializeGrids(int rows, int columns, string parentName, GameObject[,] objects) {

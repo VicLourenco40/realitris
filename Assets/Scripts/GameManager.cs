@@ -50,151 +50,129 @@ public class GameManager : MonoBehaviour
     };
     private static int[][,] JPiece = {
         new int[,] {
-            { 1, 0, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 1, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 0, 0 }
 
         },
         new int[,] {
-            { 0, 1, 1, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 1 },
+            { 0, 1, 0 },
+            { 0, 1, 0 }
         },
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 0, 1 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 0, 1, 0 },
+            { 1, 1, 0 }
         }
     };
     private static int[][,] LPiece = {
         new int[,] {
-            { 0, 0, 1, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 1 },
+            { 1, 1, 1 },
+            { 0, 0, 0 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 0, 1, 0 },
+            { 0, 1, 1 }
         },
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 1, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 1, 0, 0 }
         },
         new int[,] {
-            { 1, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 1, 1, 0 },
+            { 0, 1, 0 },
+            { 0, 1, 0 }
         }
     };
     private static int[][,] OPiece = {
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 0, 0, 0 }
+            { 1, 1 },
+            { 1, 1 }
         }
     };
     private static int[][,] SPiece = {
         new int[,] {
-            { 0, 1, 1, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 1 },
+            { 1, 1, 0 },
+            { 0, 0, 0 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 0, 1, 1 },
+            { 0, 0, 1 }
         },
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 0 },
+            { 0, 1, 1 },
+            { 1, 1, 0 }
         },
         new int[,] {
-            { 1, 0, 0, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 1, 0, 0 },
+            { 1, 1, 0 },
+            { 0, 1, 0 }
         }
     };
     private static int[][,] TPiece = {
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 1, 1, 1 },
+            { 0, 0, 0 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 0, 1, 1 },
+            { 0, 1, 0 }
         },
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 1, 1, 1, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 0 },
+            { 1, 1, 1 },
+            { 0, 1, 0 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 1, 1, 0 },
+            { 0, 1, 0 }
         }
     };
     private static int[][,] ZPiece = {
         new int[,] {
-            { 1, 1, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 1, 1, 0 },
+            { 0, 1, 1 },
+            { 0, 0, 0 }
         },
         new int[,] {
-            { 0, 0, 1, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 1 },
+            { 0, 1, 1 },
+            { 0, 1, 0 }
         },
         new int[,] {
-            { 0, 0, 0, 0 },
-            { 1, 1, 0, 0 },
-            { 0, 1, 1, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 0, 0 },
+            { 1, 1, 0 },
+            { 0, 1, 1 }
         },
         new int[,] {
-            { 0, 1, 0, 0 },
-            { 1, 1, 0, 0 },
-            { 1, 0, 0, 0 },
-            { 0, 0, 0, 0 }
+            { 0, 1, 0 },
+            { 1, 1, 0 },
+            { 1, 0, 0 }
         }
     };
     public int[][][,] Pieces = {
         IPiece, JPiece, LPiece, OPiece, SPiece, TPiece, ZPiece
     };
-    public int PieceSize = 4;
 
     public int[,] grid;
 
     public int active;
+    public int activeSize;
     private int activeRotation;
     private int activeRow;
     private int activeColumn;
@@ -264,7 +242,7 @@ public class GameManager : MonoBehaviour
     private void ClearRows() {
         int rowsCleared = 0;
 
-        for (int row = activeRow; row < Mathf.Min(activeRow + PieceSize, GridRows + GridExtraRows); row++) {
+        for (int row = activeRow; row < Mathf.Min(activeRow + activeSize, GridRows + GridExtraRows); row++) {
             bool clearRow = true;
 
             for (int column = 0; column < GridColumns; column++) {
@@ -341,10 +319,11 @@ public class GameManager : MonoBehaviour
         }
 
         activeRow = GridExtraRows;
-        if (active == 0 || active == 3) { activeRow--; }
+        if (active == 0) { activeRow--; }
 
         activeRotation = 0;
-        activeColumn = (GridColumns - PieceSize) / 2;
+        activeSize = Pieces[active][0].GetLength(0);
+        activeColumn = (GridColumns - activeSize) / 2;
 
         while(activeRow >= 0 && !IsPositionValid(activeRow, activeColumn, activeRotation)) {
             activeRow--;
@@ -352,8 +331,8 @@ public class GameManager : MonoBehaviour
     }
 
     private void PlaceActive() {
-        for (int pieceRow = 0; pieceRow < PieceSize; pieceRow++) {
-            for (int pieceColumn = 0; pieceColumn < PieceSize; pieceColumn++) {
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
                 if (Pieces[active][activeRotation][pieceRow, pieceColumn] == 1) {
                     grid[activeRow + pieceRow, activeColumn + pieceColumn] = active;
                 }
@@ -509,8 +488,8 @@ public class GameManager : MonoBehaviour
         int checkRow = ghost ? GetGhostRow() : activeRow;
         int boundStartRow = checkRow;
         int boundStartColumn = activeColumn;
-        int boundEndRow = checkRow + PieceSize - 1;
-        int boundEndColumn = activeColumn + PieceSize - 1;
+        int boundEndRow = checkRow + activeSize - 1;
+        int boundEndColumn = activeColumn + activeSize - 1;
 
         if (row < boundStartRow || column < boundStartColumn || row > boundEndRow || column > boundEndColumn) { return false; }
 
@@ -530,13 +509,13 @@ public class GameManager : MonoBehaviour
 
     private bool IsPositionInGrid(int row, int column, int rotation) {
         int boundStartColumn = column;
-        int boundEndRow = row + PieceSize - 1;
-        int boundEndColumn = column + PieceSize - 1;
+        int boundEndRow = row + activeSize - 1;
+        int boundEndColumn = column + activeSize - 1;
 
         if (boundStartColumn >= 0 && boundEndRow < GridRows + GridExtraRows && boundEndColumn < GridColumns) { return true; }
 
-        for (int pieceRow = 0; pieceRow < PieceSize; pieceRow++) {
-            for (int pieceColumn = 0; pieceColumn < PieceSize; pieceColumn++) {
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
                 if (Pieces[active][rotation][pieceRow, pieceColumn] == 1) {
                     if (!IsCellInGrid(row + pieceRow, column + pieceColumn)) { return false; }
                 }
@@ -547,8 +526,8 @@ public class GameManager : MonoBehaviour
     }
 
     private bool IsPositionFree(int row, int column, int rotation) {
-        for (int pieceRow = 0; pieceRow < PieceSize; pieceRow++) {
-            for (int pieceColumn = 0; pieceColumn < PieceSize; pieceColumn++) {
+        for (int pieceRow = 0; pieceRow < activeSize; pieceRow++) {
+            for (int pieceColumn = 0; pieceColumn < activeSize; pieceColumn++) {
                 if (Pieces[active][rotation][pieceRow, pieceColumn] == 1) {
                     if (!IsCellFree(row + pieceRow, column + pieceColumn)) { return false; }
                 }
