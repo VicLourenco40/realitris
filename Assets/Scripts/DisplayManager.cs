@@ -1,7 +1,13 @@
+using TMPro;
 using UnityEngine;
 
 public class DisplayManager : MonoBehaviour
 {
+    public TextMeshProUGUI levelDisplay;
+    public TextMeshProUGUI scoreDisplay;
+    public TextMeshProUGUI linesDisplay;
+    public TextMeshProUGUI gameOverMessage;
+
     public GameObject prefabBlock;
 
     private static int[,] IPiece = {
@@ -55,14 +61,83 @@ public class DisplayManager : MonoBehaviour
         gameGrid = new GameObject[game.GridRows, game.GridColumns];
 
         InitializeGameGrid();
+        UpdateNextGrid();
     }
 
     void Update() {
-        int nextPiece = game.pieceSequence[game.pieceIndex + 1];
-        
-        UpdateGameGrid();
-        UpdateGrids("Next", nextPiece);
-        UpdateGrids("Hold", game.holdPiece);
+        if (!game.gameOver) {
+            UpdateGameGrid();
+        }
+    }
+
+    public void GameStarted() {
+        gameOverMessage.gameObject.SetActive(false);
+
+        UpdateNextGrid();
+        UpdateHoldGrid();
+        UpdateLevel();
+        UpdateScore();
+        UpdateLines();
+    }
+
+    public void GameEnded() {
+        gameOverMessage.gameObject.SetActive(true);
+    }
+
+    private void InitializeGameGrid() {
+        for (int row = 0; row < game.GridRows; row++) {
+            for (int column = 0; column < game.GridColumns; column++) {
+                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
+                block.transform.parent = GameObject.Find("Grid").transform;
+                Vector3 position = new(column, game.GridRows - row - 1, 0);
+                block.transform.localPosition = position;
+                block.SetActive(false);
+                gameGrid[row, column] = block;
+            }
+        }
+    }
+
+    private void UpdateGameGrid() {
+        for (int row = 0; row < game.GridRows; row++) {
+            for (int column = 0; column < game.GridColumns; column++) {
+                GameObject block = gameGrid[row, column];
+                GameObject mesh = block.transform.GetChild(0).gameObject;
+                Renderer renderer = mesh.GetComponent<Renderer>();
+
+                int cell = game.grid[row + game.GridExtraRows, column];
+
+                block.SetActive(cell > -1);
+
+                if (cell > -1) {
+                    renderer.material.color = colors[cell];
+                }
+
+                if (game.IsCellActive(row + game.GridExtraRows, column, true)) {
+                    block.SetActive(true);
+                    Color colorOpaque = colors[game.active];
+                    Color colorTransparent = new(colorOpaque.r, colorOpaque.g, colorOpaque.b, 0.3f);
+                    renderer.material.color = colorTransparent;
+                }
+
+                if (game.IsCellActive(row + game.GridExtraRows, column)) {
+                    block.SetActive(true);
+                    renderer.material.color = colors[game.active];
+                }
+            }
+        }
+    }
+
+    public void UpdateNextGrid() {
+        if (game != null) {
+            int nextPiece = game.pieceSequence[game.pieceIndex + 1];
+            UpdateGrids("Next", nextPiece);
+        }
+    }
+
+    public void UpdateHoldGrid() {
+        if (game != null) {
+            UpdateGrids("Hold", game.holdPiece);
+        }
     }
 
     private void UpdateGrids(string parentName, int piece) {
@@ -96,46 +171,21 @@ public class DisplayManager : MonoBehaviour
         }
     }
 
-    private void InitializeGameGrid() {
-        for (int row = 0; row < game.GridRows; row++) {
-            for (int column = 0; column < game.GridColumns; column++) {
-                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
-                block.transform.parent = GameObject.Find("Grid").transform;
-                Vector3 position = new(column, game.GridRows - row - 1, 0);
-                block.transform.localPosition = position;
-                block.SetActive(false);
-                gameGrid[row, column] = block;
-            }
+    public void UpdateLevel() {
+        if (game != null) {
+            levelDisplay.text = "Level: " + game.level;
         }
     }
 
-    private void UpdateGameGrid() {
-        for (int row = 0; row < game.GridRows; row++) {
-            for (int column = 0; column < game.GridColumns; column++) {
-                GameObject block = gameGrid[row, column];
-                GameObject mesh = block.transform.GetChild(0).gameObject;
-                Renderer renderer = mesh.GetComponent<Renderer>();
+    public void UpdateScore() {
+        if (game != null) {
+            scoreDisplay.text = "Score: " + game.score;
+        }
+    }
 
-                int cell = game.grid[row + game.GridExtraRows, column];
-                
-                block.SetActive(cell > -1);
-
-                if (cell > -1) {
-                    renderer.material.color = colors[cell];
-                }
-
-                if (game.IsCellActive(row + game.GridExtraRows, column, true)) {
-                    block.SetActive(true);
-                    Color colorOpaque = colors[game.active];
-                    Color colorTransparent = new(colorOpaque.r, colorOpaque.g, colorOpaque.b, 0.3f);
-                    renderer.material.color = colorTransparent;
-                }
-
-                if (game.IsCellActive(row + game.GridExtraRows, column)) {
-                    block.SetActive(true);
-                    renderer.material.color = colors[game.active];
-                }
-            }
+    public void UpdateLines() {
+        if (game != null) {
+            linesDisplay.text = "Lines: " + game.linesCleared;
         }
     }
 }

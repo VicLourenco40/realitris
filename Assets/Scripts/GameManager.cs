@@ -1,12 +1,16 @@
 using System;
-using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameManager : MonoBehaviour
 {
-    public TextMeshProUGUI levelDisplay;
-    public TextMeshProUGUI scoreDisplay;
-    public TextMeshProUGUI gameOverMessage;
+    public UnityEvent gameStarted;
+    public UnityEvent gameEnded;
+    public UnityEvent pieceCreated;
+    public UnityEvent pieceHeld;
+    public UnityEvent levelUpdated;
+    public UnityEvent scoreUpdated;
+    public UnityEvent linesUpdated;
 
     public int GridRows = 20;
     public int GridExtraRows = 5;
@@ -183,10 +187,10 @@ public class GameManager : MonoBehaviour
     private static bool holdUsed;
     private static int lastDirection;
 
-    private static int score;
-    private static int rows;
-    private static int level;
-    private static bool gameOver;
+    public int score;
+    public int linesCleared;
+    public int level;
+    public bool gameOver;
 
     private static float dropTimer = DropSpeed;
     private static float placeTimer = PlaceSpeed;
@@ -198,6 +202,15 @@ public class GameManager : MonoBehaviour
     void Start() {
         grid = new int[GridRows + GridExtraRows, GridColumns];
         pieceSequence = new int[Pieces.Length * 2];
+
+        gameStarted.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameStarted);
+        gameEnded.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameEnded);
+        pieceCreated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateNextGrid);
+        pieceHeld.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateHoldGrid);
+        levelUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateLevel);
+        scoreUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateScore);
+        linesUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateLines);
+
         RestartGame();
     }
 
@@ -208,23 +221,24 @@ public class GameManager : MonoBehaviour
             }
         } else {
             UpdateActive();
-            UpdateCounters();
         }
     }
 
     private void RestartGame() {
         score = 0;
-        rows = 0;
+        linesCleared = 0;
         level = 1;
         gameOver = false;
-        gameOverMessage.gameObject.SetActive(false);
         holdPiece = -1;
         holdUsed = false;
         pieceIndex = -1;
+
         GeneratePieceSequence();
         GeneratePieceSequence();
         ClearGrid();
         CreateActive();
+
+        gameStarted.Invoke();
     }
 
     private float GetDropSpeed() {
@@ -267,9 +281,15 @@ public class GameManager : MonoBehaviour
         }
 
         if (rowsCleared > 0) {
-            rows += rowsCleared;
+            linesCleared += rowsCleared;
             score += ScoreRows[rowsCleared - 1] * level;
-            level = 1 + (rows / RowsPerLevel);
+
+            if (level < 1 + (linesCleared / RowsPerLevel)) {
+                level++;
+                levelUpdated.Invoke();
+            }
+            scoreUpdated.Invoke();
+            linesUpdated.Invoke();
         }
     }
 
@@ -278,7 +298,7 @@ public class GameManager : MonoBehaviour
             if (IsCellActive(GridExtraRows, column)) { return; }
         }
         gameOver = true;
-        gameOverMessage.gameObject.SetActive(true);
+        gameEnded.Invoke();
     }
 
     private void GeneratePieceSequence() {
@@ -314,7 +334,9 @@ public class GameManager : MonoBehaviour
     private void CreateActive(int piece = -1) {
         if (piece == -1) {
             active = GetNextPiece();
-        } else {
+            pieceCreated.Invoke();
+        }
+        else {
             active = piece;
         }
 
@@ -390,13 +412,18 @@ public class GameManager : MonoBehaviour
 
             holdPiece = lastActive;
             holdUsed = true;
+
+            pieceHeld.Invoke();
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
             while (canMoveDown) {
                 activeRow++;
                 canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
-                if (!dropScored) { score += ScoreHardDrop; }
+                if (!dropScored) {
+                    score += ScoreHardDrop;
+                    scoreUpdated.Invoke();
+                }
             }
 
             dropTimer = GetDropSpeed();
@@ -417,6 +444,7 @@ public class GameManager : MonoBehaviour
                 if (!dropScored) {
                     score += ScoreSoftDrop;
                     dropScored = true;
+                    scoreUpdated.Invoke();
                 }
             }
 
@@ -436,6 +464,7 @@ public class GameManager : MonoBehaviour
                         if (!dropScored) {
                             score += ScoreSoftDrop;
                             dropScored = true;
+                            scoreUpdated.Invoke();
                         }
                     }
 
@@ -539,10 +568,5 @@ public class GameManager : MonoBehaviour
 
     private bool IsPositionValid(int row, int column, int rotation) {
         return IsPositionInGrid(row, column, rotation) && IsPositionFree(row, column, rotation);
-    }
-
-    private void UpdateCounters() {
-        levelDisplay.text = "Level: " + level;
-        scoreDisplay.text = "Score: " + score.ToString("D6");
     }
 }
