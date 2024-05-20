@@ -436,15 +436,26 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
     }
 
-    private bool IsCellActive(int row, int column) {
-        int boundStartRow = activeRow;
+    private int GetGhostRow() {
+        int ghostRow = activeRow;
+
+        while (IsPositionValid(ghostRow + 1, activeColumn, activeRotation)) {
+            ghostRow++;
+        }
+
+        return ghostRow;
+    }
+
+    private bool IsCellActive(int row, int column, bool ghost = false) {
+        int checkRow = ghost ? GetGhostRow() : activeRow;
+        int boundStartRow = checkRow;
         int boundStartColumn = activeColumn;
-        int boundEndRow = activeRow + activeSize - 1;
+        int boundEndRow = checkRow + activeSize - 1;
         int boundEndColumn = activeColumn + activeSize - 1;
 
         if (row < boundStartRow || column < boundStartColumn || row > boundEndRow || column > boundEndColumn) { return false; }
 
-        int pieceRow = row - activeRow;
+        int pieceRow = row - checkRow;
         int pieceColumn = column - activeColumn;
 
         return Pieces[active][activeRotation][pieceRow, pieceColumn] == 1 ? true : false;
@@ -499,6 +510,8 @@ public class GameManager : MonoBehaviour
             for (int column = 0; column < GridColumns; column++) {
                 if (IsCellActive(row, column)) {
                     displayText += "O ";
+                } else if (IsCellActive(row, column, true)) {
+                    displayText += "o ";
                 } else {
                     displayText += grid[row, column] == 1 ? "# " : ". ";
                 }
