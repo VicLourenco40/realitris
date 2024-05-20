@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public TextMeshProUGUI nextPieceDisplay;
-    public TextMeshProUGUI holdPieceDisplay;
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
     public TextMeshProUGUI gameOverMessage;
@@ -205,6 +203,7 @@ public class GameManager : MonoBehaviour
     public int[] pieceSequence;
     public int holdPiece;
     private static bool holdUsed;
+    private static int lastDirection;
 
     private static int score;
     private static int rows;
@@ -386,6 +385,7 @@ public class GameManager : MonoBehaviour
     private void UpdateActive() {
         bool canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
         bool dropScored = false;
+        int direction = GetDirection();
 
         dropTimer -= Time.deltaTime;
 
@@ -472,12 +472,14 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
         if (Input.GetKeyDown(KeyCode.RightArrow) && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
 
-        if (GetDirection() == 0) {
+        if (direction == 0 || direction != lastDirection) {
             dasDelayTimer = DasDelaySpeed;
             dasTimer = DasSpeed;
         } else {
             dasDelayTimer -= Time.deltaTime;
         }
+
+        lastDirection = direction;
 
         if (dasDelayTimer <= 0.0f) {
             if (dasTimer <= 0.0f) {
@@ -488,7 +490,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) { activeRotation = GetNextRotation(); }
+        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) {
+            activeRotation = GetNextRotation();
+        }
     }
 
     private int GetGhostRow() {
