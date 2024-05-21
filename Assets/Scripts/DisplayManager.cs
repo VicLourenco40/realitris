@@ -41,6 +41,7 @@ public class DisplayManager : MonoBehaviour
         IPiece, JPiece, LPiece, OPiece, SPiece, TPiece, ZPiece
     };
 
+    private static Color colorPiece = new(1f, 1f, 1f, 1f);
     private static Color colorIPiece = new(0f, 1f, 1f, 1f);
     private static Color colorJPiece = new(0f, 0f, 1f, 1f);
     private static Color colorLPiece = new(1f, 0.5f, 0f, 1f);
@@ -87,7 +88,7 @@ public class DisplayManager : MonoBehaviour
     private void InitializeGameGrid() {
         for (int row = 0; row < game.GridRows; row++) {
             for (int column = 0; column < game.GridColumns; column++) {
-                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
+                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.Euler(0, 180, 0));
                 block.transform.parent = GameObject.Find("Grid").transform;
                 Vector3 position = new(column, game.GridRows - row - 1, 0);
                 block.transform.localPosition = position;
@@ -101,27 +102,33 @@ public class DisplayManager : MonoBehaviour
         for (int row = 0; row < game.GridRows; row++) {
             for (int column = 0; column < game.GridColumns; column++) {
                 GameObject block = gameGrid[row, column];
-                GameObject mesh = block.transform.GetChild(0).gameObject;
-                Renderer renderer = mesh.GetComponent<Renderer>();
+                Renderer renderer = block.GetComponent<Renderer>();
 
                 int cell = game.grid[row + game.GridExtraRows, column];
 
                 block.SetActive(cell > -1);
 
                 if (cell > -1) {
-                    renderer.material.color = colors[cell];
+                    renderer.materials[0].color = colors[cell];
+                    renderer.materials[1].color = colorPiece;
                 }
 
                 if (game.IsCellActive(row + game.GridExtraRows, column, true)) {
                     block.SetActive(true);
-                    Color colorOpaque = colors[game.active];
-                    Color colorTransparent = new(colorOpaque.r, colorOpaque.g, colorOpaque.b, 0.3f);
-                    renderer.material.color = colorTransparent;
+
+                    renderer.material.color = colors[game.active];
+
+                    foreach (Material material in renderer.materials) {
+                        Color colorOpaque = material.color;
+                        Color colorTransparent = new(colorOpaque.r, colorOpaque.g, colorOpaque.b, 0.3f);
+                        material.color = colorTransparent;
+                    }
                 }
 
                 if (game.IsCellActive(row + game.GridExtraRows, column)) {
                     block.SetActive(true);
-                    renderer.material.color = colors[game.active];
+                    renderer.materials[0].color = colors[game.active];
+                    renderer.materials[1].color = colorPiece;
                 }
             }
         }
@@ -156,9 +163,8 @@ public class DisplayManager : MonoBehaviour
             for (int column = 0; column < pieceX; column++) {
                 if (Pieces[piece][row, column] == 0) { continue; }
 
-                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.identity);
-                GameObject mesh = block.transform.GetChild(0).gameObject;
-                Renderer renderer = mesh.GetComponent<Renderer>();
+                GameObject block = Instantiate(prefabBlock, Vector3.zero, Quaternion.Euler(0, 180, 0));
+                Renderer renderer = block.GetComponent<Renderer>();
 
                 float originX = ((4 - pieceX) / 2f) + column;
                 float originY = 3 - ((4 - pieceY) / 2f) - row;

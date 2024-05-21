@@ -222,6 +222,10 @@ public class GameManager : MonoBehaviour
         } else {
             UpdateActive();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Application.Quit();
+        }
     }
 
     private void RestartGame() {
