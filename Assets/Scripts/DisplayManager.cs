@@ -6,6 +6,7 @@ public class DisplayManager : MonoBehaviour
     public TextMeshProUGUI levelDisplay;
     public TextMeshProUGUI scoreDisplay;
     public TextMeshProUGUI linesDisplay;
+    public TextMeshProUGUI highScoreDisplay;
     public TextMeshProUGUI gameOverMessage;
 
     public GameObject prefabBlock;
@@ -61,6 +62,7 @@ public class DisplayManager : MonoBehaviour
         game = GameObject.Find("Game Manager").GetComponent<GameManager>();
         gameGrid = new GameObject[game.GridRows, game.GridColumns];
 
+        UpdateHighScore();
         InitializeGameGrid();
         UpdateNextGrid();
     }
@@ -83,6 +85,7 @@ public class DisplayManager : MonoBehaviour
 
     public void GameEnded() {
         gameOverMessage.gameObject.SetActive(true);
+        UpdateHighScore();
     }
 
     private void InitializeGameGrid() {
@@ -192,6 +195,12 @@ public class DisplayManager : MonoBehaviour
     public void UpdateLines() {
         if (game != null) {
             linesDisplay.text = "Lines: " + game.linesCleared;
+        }
+    }
+
+    public void UpdateHighScore() {
+        if (game != null) {
+            highScoreDisplay.text = "High Score: " + game.highScore;
         }
     }
 }

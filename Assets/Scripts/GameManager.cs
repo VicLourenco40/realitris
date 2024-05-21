@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.Design;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -187,6 +188,7 @@ public class GameManager : MonoBehaviour
     private static bool holdUsed;
     private static int lastDirection;
 
+    public int highScore = 0;
     public int score;
     public int linesCleared;
     public int level;
@@ -202,6 +204,12 @@ public class GameManager : MonoBehaviour
     void Start() {
         grid = new int[GridRows + GridExtraRows, GridColumns];
         pieceSequence = new int[Pieces.Length * 2];
+
+        if (PlayerPrefs.HasKey("High Score")) {
+            highScore = PlayerPrefs.GetInt("High Score");
+        } else {
+            PlayerPrefs.SetInt("High Score", 0);
+        }
 
         gameStarted.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameStarted);
         gameEnded.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameEnded);
@@ -226,6 +234,16 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)) {
             Application.Quit();
         }
+    }
+
+    private void EndGame() {
+        if (score > highScore) {
+            highScore = score;
+            PlayerPrefs.SetInt("High Score", highScore);
+        }
+
+        gameOver = true;
+        gameEnded.Invoke();
     }
 
     private void RestartGame() {
@@ -301,8 +319,7 @@ public class GameManager : MonoBehaviour
         for (int column = 0; column < GridColumns; column++) {
             if (IsCellActive(GridExtraRows, column)) { return; }
         }
-        gameOver = true;
-        gameEnded.Invoke();
+        EndGame();
     }
 
     private void GeneratePieceSequence() {
