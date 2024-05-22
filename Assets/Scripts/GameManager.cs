@@ -1,7 +1,7 @@
 using System;
-using System.ComponentModel.Design;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +12,13 @@ public class GameManager : MonoBehaviour
     public UnityEvent levelUpdated;
     public UnityEvent scoreUpdated;
     public UnityEvent linesUpdated;
+
+    private ButtonManager moveLeft;
+    private ButtonManager moveRight;
+    private ButtonManager softDrop;
+    private ButtonManager hardDrop;
+    private ButtonManager rotate;
+    private ButtonManager hold;
 
     public int GridRows = 20;
     public int GridExtraRows = 5;
@@ -219,6 +226,13 @@ public class GameManager : MonoBehaviour
         scoreUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateScore);
         linesUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateLines);
 
+        moveLeft = GameObject.Find("Move Left Button").GetComponent<ButtonManager>();
+        moveRight = GameObject.Find("Move Right Button").GetComponent<ButtonManager>();
+        softDrop = GameObject.Find("Soft Drop Button").GetComponent<ButtonManager>();
+        hardDrop = GameObject.Find("Hard Drop Button").GetComponent<ButtonManager>();
+        rotate = GameObject.Find("Rotate Button").GetComponent<ButtonManager>();
+        hold = GameObject.Find("Hold Button").GetComponent<ButtonManager>();
+
         RestartGame();
     }
 
@@ -264,7 +278,7 @@ public class GameManager : MonoBehaviour
     }
 
     private float GetDropSpeed() {
-        return Mathf.Max(0.1f, DropSpeed - (level * 0.1f));
+        return Mathf.Max(0.1f, DropSpeed - (level * 0.2f));
     }
 
     private void ClearGrid() {
@@ -398,8 +412,8 @@ public class GameManager : MonoBehaviour
     private int GetDirection() {
         int direction = 0;
 
-        if (Input.GetKey(KeyCode.LeftArrow)) { direction--; }
-        if (Input.GetKey(KeyCode.RightArrow)) { direction++; }
+        if (moveLeft.isHeld) { direction--; }
+        if (moveRight.isHeld) { direction++; }
 
         return direction;
     }
@@ -422,7 +436,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (!holdUsed && Input.GetKeyDown(KeyCode.C)) {
+        if (!holdUsed && hold.IsClicked) {
             int lastActive = active;
 
             if (holdPiece == -1) {
@@ -437,7 +451,7 @@ public class GameManager : MonoBehaviour
             pieceHeld.Invoke();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) {
+        if (hardDrop.IsClicked) {
             while (canMoveDown) {
                 activeRow++;
                 canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
@@ -458,7 +472,7 @@ public class GameManager : MonoBehaviour
             dropTimer = GetDropSpeed();
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow)) {
+        if (softDrop.IsClicked) {
             if (canMoveDown) {
                 activeRow++;
 
@@ -472,7 +486,7 @@ public class GameManager : MonoBehaviour
             dropTimer = GetDropSpeed();
         }
 
-        if (Input.GetKey(KeyCode.DownArrow)) {
+        if (softDrop.isHeld) {
             dasDownDelayTimer -= Time.deltaTime;
 
             if (dasDownDelayTimer <= 0.0f) {
@@ -498,8 +512,8 @@ public class GameManager : MonoBehaviour
             dasDownTimer = DasSpeed;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
-        if (Input.GetKeyDown(KeyCode.RightArrow) && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
+        if (moveLeft.IsClicked && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
+        if (moveRight.IsClicked && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
 
         if (direction == 0 || direction != lastDirection) {
             dasDelayTimer = DasDelaySpeed;
@@ -519,7 +533,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && IsPositionValid(activeRow, activeColumn, GetNextRotation())) {
+        if (rotate.IsClicked && IsPositionValid(activeRow, activeColumn, GetNextRotation())) {
             activeRotation = GetNextRotation();
         }
     }
