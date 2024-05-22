@@ -9,6 +9,9 @@ public class DisplayManager : MonoBehaviour
     public TextMeshProUGUI highScoreDisplay;
     public TextMeshProUGUI gameOverMessage;
 
+    private ButtonManager restart;
+    private ButtonManager quit;
+
     private static GameManager game;
 
     void Start() {
@@ -20,11 +23,28 @@ public class DisplayManager : MonoBehaviour
         game.scoreUpdated.AddListener(UpdateScore);
         game.linesUpdated.AddListener(UpdateLines);
 
+        restart = GameObject.Find("Restart Button").GetComponent<ButtonManager>();
+        quit = GameObject.Find("Quit Button").GetComponent<ButtonManager>();
+
         UpdateHighScore();
+        GameStarted();
+    }
+
+    void Update() {
+        if (game.gameOver) {
+            if (restart.IsClicked) {
+                game.RestartGame();
+            }
+            if (quit.IsClicked) {
+                Application.Quit();
+            }
+        }
     }
 
     public void GameStarted() {
         gameOverMessage.gameObject.SetActive(false);
+        restart.gameObject.SetActive(false);
+        quit.gameObject.SetActive(false);
         UpdateLevel();
         UpdateScore();
         UpdateLines();
@@ -32,6 +52,8 @@ public class DisplayManager : MonoBehaviour
 
     public void GameEnded() {
         gameOverMessage.gameObject.SetActive(true);
+        restart.gameObject.SetActive(true);
+        quit.gameObject.SetActive(true);
         UpdateHighScore();
     }
 

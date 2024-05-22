@@ -253,7 +253,7 @@ public class GameManager : MonoBehaviour
         gameEnded.Invoke();
     }
 
-    private void RestartGame() {
+    public void RestartGame() {
         score = 0;
         linesCleared = 0;
         level = 1;
