@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -219,14 +218,6 @@ public class GameManager : MonoBehaviour
         } else {
             PlayerPrefs.SetInt("High Score", 0);
         }
-
-        gameStarted.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameStarted);
-        gameEnded.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().GameEnded);
-        pieceCreated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateNextGrid);
-        pieceHeld.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateHoldGrid);
-        levelUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateLevel);
-        scoreUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateScore);
-        linesUpdated.AddListener(GameObject.Find("Display Manager").GetComponent<DisplayManager>().UpdateLines);
 
         moveLeft = GameObject.Find("Move Left Button").GetComponent<ButtonManager>();
         moveRight = GameObject.Find("Move Right Button").GetComponent<ButtonManager>();
