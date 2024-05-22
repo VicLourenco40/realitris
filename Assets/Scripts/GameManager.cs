@@ -209,6 +209,8 @@ public class GameManager : MonoBehaviour
     private static float dasDownTimer = DasSpeed;
 
     void Start() {
+        Application.targetFrameRate = 60;
+
         grid = new int[GridRows + GridExtraRows, GridColumns];
         pieceSequence = new int[Pieces.Length * 2];
 
