@@ -7,7 +7,10 @@ public class GameManager : MonoBehaviour
     public UnityEvent gameStarted;
     public UnityEvent gameEnded;
     public UnityEvent pieceCreated;
+    public UnityEvent pieceMoved;
+    public UnityEvent pieceRotated;
     public UnityEvent pieceHeld;
+    public UnityEvent piecePlaced;
     public UnityEvent levelUpdated;
     public UnityEvent scoreUpdated;
     public UnityEvent linesUpdated;
@@ -385,7 +388,10 @@ public class GameManager : MonoBehaviour
 
         ClearRows();
         if (activeRow < GridExtraRows) { CheckLockOut(); }
-        if (!gameOver) { CreateActive(); }
+        if (!gameOver) {
+            CreateActive();
+            piecePlaced.Invoke();
+        }
     }
 
     private int GetNextRotation() {
@@ -440,6 +446,7 @@ public class GameManager : MonoBehaviour
             while (canMoveDown) {
                 activeRow++;
                 canMoveDown = IsPositionValid(activeRow + 1, activeColumn, activeRotation);
+
                 if (!dropScored) {
                     score += ScoreHardDrop;
                     scoreUpdated.Invoke();
@@ -453,13 +460,16 @@ public class GameManager : MonoBehaviour
         }
 
         if (dropTimer <= 0.0f) {
-            if (canMoveDown) { activeRow++; }
+            if (canMoveDown) {
+                activeRow++;
+            }
             dropTimer = GetDropSpeed();
         }
 
         if (softDrop.IsClicked) {
             if (canMoveDown) {
                 activeRow++;
+                pieceMoved.Invoke();
 
                 if (!dropScored) {
                     score += ScoreSoftDrop;
@@ -497,8 +507,14 @@ public class GameManager : MonoBehaviour
             dasDownTimer = DasSpeed;
         }
 
-        if (moveLeft.IsClicked && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) { activeColumn--; }
-        if (moveRight.IsClicked && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) { activeColumn++; }
+        if (moveLeft.IsClicked && IsPositionValid(activeRow, activeColumn - 1, activeRotation)) {
+            activeColumn--;
+            pieceMoved.Invoke();
+        }
+        if (moveRight.IsClicked && IsPositionValid(activeRow, activeColumn + 1, activeRotation)) {
+            activeColumn++;
+            pieceMoved.Invoke();
+        }
 
         if (direction == 0 || direction != lastDirection) {
             dasDelayTimer = DasDelaySpeed;
@@ -511,7 +527,10 @@ public class GameManager : MonoBehaviour
 
         if (dasDelayTimer <= 0.0f) {
             if (dasTimer <= 0.0f) {
-                if (IsPositionValid(activeRow, activeColumn + GetDirection(), activeRotation)) { activeColumn += GetDirection(); }
+                if (IsPositionValid(activeRow, activeColumn + GetDirection(), activeRotation)) {
+                    activeColumn += GetDirection();
+                    pieceMoved.Invoke();
+                }
                 dasTimer = DasSpeed;
             } else {
                 dasTimer -= Time.deltaTime;
@@ -520,6 +539,7 @@ public class GameManager : MonoBehaviour
 
         if (rotate.IsClicked && IsPositionValid(activeRow, activeColumn, GetNextRotation())) {
             activeRotation = GetNextRotation();
+            pieceRotated.Invoke();
         }
     }
 
