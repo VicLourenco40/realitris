@@ -226,20 +226,12 @@ public class GameManager : MonoBehaviour
         rotate = GameObject.Find("Rotate Button").GetComponent<ButtonManager>();
         hold = GameObject.Find("Hold Button").GetComponent<ButtonManager>();
 
-        RestartGame();
+        gameOver = true;
     }
 
     void Update() {
-        if (gameOver) {
-            if (Input.GetKeyDown(KeyCode.R)) {
-                RestartGame();
-            }
-        } else {
+        if (!gameOver) {
             UpdateActive();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            Application.Quit();
         }
     }
 

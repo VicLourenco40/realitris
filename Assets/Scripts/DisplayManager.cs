@@ -3,13 +3,15 @@ using UnityEngine;
 
 public class DisplayManager : MonoBehaviour
 {
-    public TextMeshProUGUI levelDisplay;
-    public TextMeshProUGUI scoreDisplay;
-    public TextMeshProUGUI linesDisplay;
-    public TextMeshProUGUI highScoreDisplay;
-    public TextMeshProUGUI gameOverMessage;
+    public TextMeshProUGUI title;
+    public TextMeshProUGUI level;
+    public TextMeshProUGUI score;
+    public TextMeshProUGUI lines;
+    public TextMeshProUGUI highScore;
+    public TextMeshProUGUI gameOver;
+    public GameObject darkPanel;
 
-    private ButtonManager restart;
+    private ButtonManager play;
     private ButtonManager quit;
 
     private static GameManager game;
@@ -23,16 +25,16 @@ public class DisplayManager : MonoBehaviour
         game.scoreUpdated.AddListener(UpdateScore);
         game.linesUpdated.AddListener(UpdateLines);
 
-        restart = GameObject.Find("Restart Button").GetComponent<ButtonManager>();
+        play = GameObject.Find("Play Button").GetComponent<ButtonManager>();
         quit = GameObject.Find("Quit Button").GetComponent<ButtonManager>();
 
+        gameOver.gameObject.SetActive(false);
         UpdateHighScore();
-        GameStarted();
     }
 
     void Update() {
         if (game.gameOver) {
-            if (restart.IsClicked) {
+            if (play.IsClicked) {
                 game.RestartGame();
             }
             if (quit.IsClicked) {
@@ -42,8 +44,10 @@ public class DisplayManager : MonoBehaviour
     }
 
     public void GameStarted() {
-        gameOverMessage.gameObject.SetActive(false);
-        restart.gameObject.SetActive(false);
+        title.gameObject.SetActive(false);
+        gameOver.gameObject.SetActive(false);
+        darkPanel.SetActive(false);
+        play.gameObject.SetActive(false);
         quit.gameObject.SetActive(false);
         UpdateLevel();
         UpdateScore();
@@ -51,25 +55,27 @@ public class DisplayManager : MonoBehaviour
     }
 
     public void GameEnded() {
-        gameOverMessage.gameObject.SetActive(true);
-        restart.gameObject.SetActive(true);
+        title.gameObject.SetActive(true);
+        gameOver.gameObject.SetActive(true);
+        darkPanel.SetActive(true);
+        play.gameObject.SetActive(true);
         quit.gameObject.SetActive(true);
         UpdateHighScore();
     }
 
     public void UpdateLevel() {
-        levelDisplay.text = "Level: " + game.level;
+        level.text = "Level: " + game.level;
     }
 
     public void UpdateScore() {
-        scoreDisplay.text = "Score: " + game.score;
+        score.text = "Score: " + game.score;
     }
 
     public void UpdateLines() {
-        linesDisplay.text = "Lines: " + game.linesCleared;
+        lines.text = "Lines: " + game.linesCleared;
     }
 
     public void UpdateHighScore() {
-        highScoreDisplay.text = "High Score: " + game.highScore;
+        highScore.text = "High Score: " + game.highScore;
     }
 }
